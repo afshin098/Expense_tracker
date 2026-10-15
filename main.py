@@ -5,7 +5,16 @@ from expenses import (
     add_expense,
     update_expense,
     delete_expense,
+    get_expenses_by_category,
 )
+
+def show_categories():
+    print("1.Healthy")
+    print("2.Books")
+    print("3.Food")
+    print("4.Entertainment")
+    print("5.Travel")
+    print("6.All")
 
 
 def main(cursor, connection):
@@ -21,18 +30,31 @@ def main(cursor, connection):
         choice = input("Enter Your Choice:")
 
         if choice == "1":
-            expenses = get_all_expenses(cursor)
+            show_categories()
+            try:
+                selected_category_id = int(input("Enter a ID: "))
 
-            if not expense:
-                print("No Expenses Found")
-            else:
-                print(
-                    f"{'id':<5}{'Title':<30}{'Amount':<15}{'Date':<13}{'Category':<10}"
-                )
-                for expense in expenses:
+                if selected_category_id == 6:
+                    expenses = get_all_expenses(cursor)
+
+                elif 1 <= selected_category_id <= 5:
+                    expenses = get_expenses_by_category(cursor, selected_category_id)
+                else:
+                    print("Invalid Category ID. Chose From 1 to 6.")
+                    continue
+
+                if not expenses:
+                    print("No Expenses Found")
+                else:
                     print(
-                        f"{expense[0]:<5}{expense[1]:<30}{expense[2]:<15}{expense[3]!s:<13}{expense[5]:<10}"
+                        f"{'id':<5}{'Title':<30}{'Amount':<15}{'Date':<13}{'Category':<10}"
                     )
+                    for expense in expenses:
+                        print(
+                            f"{expense[0]:<5}{expense[1]:<30}{expense[2]:<15}{expense[3]!s:<13}{expense[5]:<10}"
+                        )
+            except ValueError:
+                print("Id Must be Number")
 
         elif choice == "2":
             try:
@@ -62,10 +84,8 @@ def main(cursor, connection):
                 elif category_id == 3:
                     return "Food"
                 elif category_id == 4:
-                    return "Books"
-                elif category_id == 5:
                     return "Entertainment"
-                elif category_id == 6:
+                elif category_id == 5:
                     return "Travel"
 
             title = input("Title: ").strip()
@@ -94,7 +114,7 @@ def main(cursor, connection):
                 new_expense_id = add_expense(cursor, title, amount, category_id)
                 connection.commit()
                 print("Expense added successfully.")
-                print(f"{'id':<5}{'Title':<12}{'Amount':<12}{'Category_id':<8}")
+                print(f"{'id':<5}{'Title':<12}{'Amount':<12}{'Category':<8}")
                 print(
                     f"{new_expense_id:<5}{title:<12}{amount:<12} {set_category_name(category_id):<8}"
                 )
@@ -105,9 +125,9 @@ def main(cursor, connection):
         elif choice == "4":
             try:
                 expense_id = int(input("Expense ID:"))
-                new_amount = int(input("New Amount"))
-                if new_amount < 0:
-                    print("new Amount Can not be Zero or Lower")
+                new_amount = int(input("New Amount:"))
+                if new_amount <= 0:
+                    print("New amount must be greater than zero.")
                     continue
             except ValueError:
                 print("expense id and new amount must be Number")

@@ -1,4 +1,18 @@
-from turtle import title
+def get_expenses_by_category(cursor, category_id):
+    cursor.execute(
+        """
+    SELECT
+        expenses.*,
+        categories.name
+    FROM expenses
+    JOIN categories
+        ON expenses.category_id = categories.id
+    WHERE expenses.category_id = %s
+    order by expenses.id asc
+    """,
+        (category_id,),
+    )
+    return cursor.fetchall()
 
 
 def get_all_expenses(cursor):
